@@ -1,6 +1,10 @@
 package com.example.myapplication;
 
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -16,6 +20,8 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
+    private DatabaseConfig dbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,39 +32,49 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-    }
 
+        dbHelper = new DatabaseConfig(this); // Inicializa o DatabaseConfig
+    }
 
     public void selectionBoto(View v) {
         Random random = new Random();
-        int x = 0, x1 = 0, x2 = 0, x3 = 0, x4 = 0, x5 = 0;
-        x = random.nextInt(60) + 1;
-        x1 = random.nextInt(60) + 1;
-        x2 = random.nextInt(60) + 1;
-        x3 = random.nextInt(60) + 1;
-        x4 = random.nextInt(60) + 1;
-        x5 = random.nextInt(60) + 1;
+        int[] numerosSorteados = new int[6];
 
-        TextView Numero = findViewById(R.id.Numero);
-        Numero.setText("" + x);
+        // Sorteia os números
+        for (int i = 0; i < numerosSorteados.length; i++) {
+            numerosSorteados[i] = random.nextInt(60) + 1;
+        }
 
-        TextView Numero1 = findViewById(R.id.Numero1);
-        Numero1.setText("" + x1);
+        // Insere os números sorteados no banco de dados
+        for (int i = 0; i < numerosSorteados.length; i++) {
+            adicionarNumeroSorteado(numerosSorteados[i]);
+        }
 
-        TextView Numero2 = findViewById(R.id.Numero2);
-        Numero2.setText("" + x2);
+        // Atualiza a interface do usuário com os números sorteados
+        atualizarNumerosSorteados(numerosSorteados);
+    }
 
-        TextView Numero3 = findViewById(R.id.Numero3);
-        Numero3.setText("" + x3);
+    private void adicionarNumeroSorteado(int numero) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("numero", numero);
+        db.insert("Sorteio", null, values);
+        db.close();
+    }
 
-        TextView Numero4 = findViewById(R.id.Numero4);
-        Numero4.setText("" + x4);
+    private void atualizarNumerosSorteados(int[] numerosSorteados) {
+        TextView[] numerosTextView = new TextView[]{
+                findViewById(R.id.Numero),
+                findViewById(R.id.Numero1),
+                findViewById(R.id.Numero2),
+                findViewById(R.id.Numero3),
+                findViewById(R.id.Numero4),
+                findViewById(R.id.Numero5)
+        };
 
-        TextView Numero5 = findViewById(R.id.Numero5);
-        Numero5.setText("" + x5);
-
-
-
+        for (int i = 0; i < numerosSorteados.length; i++) {
+            numerosTextView[i].setText(String.valueOf(numerosSorteados[i]));
+        }
     }
 
     public void tela2(View view){
@@ -66,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 }
+
 
 
 
